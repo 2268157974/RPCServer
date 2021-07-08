@@ -13,4 +13,6 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     implementation 'io.netty:netty-all:4.1.65.Final'
     implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'org.projectlombok:lombok:1.18.20'
+    annotationProcessor 'org.projectlombok:lombok:1.18.20'
 }

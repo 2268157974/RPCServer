@@ -3,8 +3,10 @@ package com.lch.rpc.socket;
 import com.lch.rpc.util.Logg;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -41,7 +43,15 @@ public class RPCServer implements Runnable {
                 //可以将此功能视为TCP的心跳机制，需要注意的是：默认的心跳间隔是7200s即2小时。
                 //Netty默认关闭该功能。
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
-                .childHandler(null);
+                .childHandler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel ch) throws Exception {
+                        ch.pipeline()
+                                .addLast(new RPCDecoder(TAG))
+                                .addLast(new RPCEncoder())
+                                .addLast(new RPCHandler());
+                    }
+                });
         try {
             mChannel = mBootstrap.bind(PORT).sync().channel();
             Logg.d(TAG, "SERVER START SUCCESS");
@@ -54,9 +64,13 @@ public class RPCServer implements Runnable {
         }
     }
 
-    public void start() {
+    private void start() {
         mExecutor = new ScheduledThreadPoolExecutor(1, new IThreadFactory(TAG));
         mExecutor.schedule(this, 0, TimeUnit.MILLISECONDS);
+    }
+
+    public static void startServer() {
+        new RPCServer().start();
     }
 
     @Override

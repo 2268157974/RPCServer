@@ -1,7 +1,5 @@
 package com.lch.rpc.util;
 
-import sun.rmi.runtime.Log;
-
 public class Logg {
     private Logg() {
     }
